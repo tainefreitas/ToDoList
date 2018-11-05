@@ -17,6 +17,7 @@ class App extends Component {
     this.addTodo = this.addTodo.bind(this);
     this.deleteTodo = this.deleteTodo.bind(this);
     this.handleChange = this.handleChange.bind(this);
+    this.generateTodoId= this.generateTodoId.bind(this);
   }
 
   handleChange(event) {
@@ -24,11 +25,19 @@ class App extends Component {
       newTodo: event.target.value
     });
   }
+  generateTodoId(){
+    const lastTodo = this.state.todos[this.state.todos.length -1];
+    if(lastTodo){
+      return lastTodo.id + 1;
+    }
+      return 1;
+  }
+
 
   addTodo() {
     const newTodo = {
       name: this.state.newTodo,
-      id: this.state.todos[this.state.todos.length - 1].id + 1
+      id: this.generateTodoId()
     };
 
     const todos = this.state.todos;
@@ -39,6 +48,7 @@ class App extends Component {
       newTodo: ''
     });
   }
+  
   deleteTodo(index){
     const todos = this.state.todos;
     delete todos[index];
