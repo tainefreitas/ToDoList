@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import ListItem from './ListItem';
 
 class App extends Component {
   constructor() {
@@ -9,10 +10,14 @@ class App extends Component {
       newTodo: '',
       editing: false,
       editingIndex: null,
+      notification: null,
       todos: [{
         id: 1, name: 'Programar'
       }]
     };
+
+
+    this.alert = this.alert.bind(this);
     this.updateTodo = this.updateTodo.bind(this);
     this.addTodo = this.addTodo.bind(this);
     this.deleteTodo = this.deleteTodo.bind(this);
@@ -47,13 +52,29 @@ class App extends Component {
       todos: todos,
       newTodo: ''
     });
+    this.alert('Tarefa adicionada com sucesso!');
+
   }
-  
+
+  alert(notification){
+    this.setState({
+      notification
+    });
+
+    setTimeout(()=>{
+      this.setState({
+        notification: null
+      });
+    }, 2000);
+
+  }
+
   deleteTodo(index){
     const todos = this.state.todos;
     delete todos[index];
 
     this.setState({todos});
+    this.alert('Tarefa excluída com sucesso!');
 
   }
   editTodo(index){
@@ -74,6 +95,8 @@ class App extends Component {
 
     todos[this.state.editingIndex] = todo;
     this.setState({todos, editing:false, editingIndex:null, newTodo: ''});
+    this.alert('Tarefa editada com sucesso!');
+
 
   }
   render() {
@@ -83,7 +106,15 @@ class App extends Component {
           <img src={logo} className="App-logo" alt="logo" />
           <h1 className="App-title">Lista de Tarefas</h1>
         </header>
-        <div className="container">
+        <div className="container"> 
+        {
+          this.state.notification && 
+          <div className="alert alert-success">
+            <p className="text-center">
+            {this.state.notification}
+              </p>
+          </div>
+        }
           <input type="text" 
           name="todo" 
           className="my-4 form-control"
@@ -99,17 +130,12 @@ class App extends Component {
           !this.state.editing &&
             <ul className="list-group">
               {this.state.todos.map((item, index) => {
-                return <li key={item.id} className="list-group-item">
-                <button onClick = {() => {this.editTodo(index);}}
-                className="btn-sm mr-4 btn btn-success">
-                Editar
-                </button>
-                {item.name}
-                <button onClick = {() => {this.deleteTodo(index);}}
-                className="btn-sm ml-4 btn btn-danger">
-                Excluir
-                </button>
-                </li>
+                return <ListItem
+                key = {item.id}
+                item = {item}
+                editTodo = {() => {this.editTodo(index);}}
+                deleteTodo = {() => {this.deleteTodo(index);}}
+                />;
               })}     
             </ul>
         }
