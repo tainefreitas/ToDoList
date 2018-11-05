@@ -10,13 +10,7 @@ class App extends Component {
       editing: false,
       editingIndex: null,
       todos: [{
-        id: 1, name: 'Play golf'
-      }, {
-        id: 2, name: 'Buy some clothes'
-      }, {
-        id: 3, name: 'Write some code'
-      }, {
-        id: 4, name: 'Watch Bahdcasts'
+        id: 1, name: 'Programar'
       }]
     };
     this.updateTodo = this.updateTodo.bind(this);
@@ -77,7 +71,7 @@ class App extends Component {
       <div className="App">
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">CRUD React</h1>
+          <h1 className="App-title">Lista de Tarefas</h1>
         </header>
         <div className="container">
           <input type="text" 
