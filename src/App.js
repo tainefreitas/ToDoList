@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
+import loading from './loading.gif';
 import './App.css';
 import ListItem from './ListItem';
+import axios from 'axios';
 
 class App extends Component {
   constructor() {
@@ -11,18 +13,16 @@ class App extends Component {
       editing: false,
       editingIndex: null,
       notification: null,
-      todos: [{
-        id: 1, name: 'Programar'
-      }]
+      todos: [],
+      loading: true
     };
 
-
+    this.apiUrl = 'https://5be0c717f2ef840013994c29.mockapi.io';
     this.alert = this.alert.bind(this);
     this.updateTodo = this.updateTodo.bind(this);
     this.addTodo = this.addTodo.bind(this);
     this.deleteTodo = this.deleteTodo.bind(this);
     this.handleChange = this.handleChange.bind(this);
-    this.generateTodoId= this.generateTodoId.bind(this);
   }
 
   handleChange(event) {
@@ -30,23 +30,30 @@ class App extends Component {
       newTodo: event.target.value
     });
   }
-  generateTodoId(){
-    const lastTodo = this.state.todos[this.state.todos.length -1];
-    if(lastTodo){
-      return lastTodo.id + 1;
-    }
-      return 1;
+
+  async componentDidMount(){
+
+    const response = await axios.get(`${this.apiUrl}/todos`);
+    setTimeout(()=>{
+        this.setState({
+          todos: response.data,
+          loading: false
+        });
+      }, 1000);
+  
   }
 
 
-  addTodo() {
-    const newTodo = {
-      name: this.state.newTodo,
-      id: this.generateTodoId()
-    };
+
+  async addTodo() {
+
+    const response = await axios.post(`${this.apiUrl}/todos`, 
+    {name: this.state.newTodo});
+
+    console.log(response);
 
     const todos = this.state.todos;
-    todos.push(newTodo);
+    todos.push(response.data);
 
     this.setState({
       todos: todos,
@@ -69,8 +76,11 @@ class App extends Component {
 
   }
 
-  deleteTodo(index){
+  async deleteTodo(index){
     const todos = this.state.todos;
+    const todo = todos[index];
+
+    await axios.delete(`${this.apiUrl}/todos/${todo.id}`);
     delete todos[index];
 
     this.setState({todos});
@@ -86,15 +96,20 @@ class App extends Component {
       editingIndex: index
     })
   }
-  updateTodo(){
+  async updateTodo(){
     const todo = this.state.todos[this.state.editingIndex];
 
-    todo.name = this.state.newTodo;
+    const response = await axios.put(`${this.apiUrl}/todos/${todo.id}`, {
+      name: this.state.newTodo
+    });
 
     const todos = this.state.todos;
+    todos[this.state.editingIndex] = response.data;
 
-    todos[this.state.editingIndex] = todo;
-    this.setState({todos, editing:false, editingIndex:null, newTodo: ''});
+    this.setState({todos, 
+                  editing:false, 
+                  editingIndex:null, 
+                  newTodo: ''});
     this.alert('Tarefa editada com sucesso!');
 
 
@@ -118,16 +133,22 @@ class App extends Component {
           <input type="text" 
           name="todo" 
           className="my-4 form-control"
-            placeholder="Add a new todo" 
+            placeholder="Digite uma nova tarefa" 
             onChange={this.handleChange}
             value={this.state.newTodo}
           />
         <button onClick={this.state.editing ? this.updateTodo : this.addTodo} 
-        className="btn-info mb-3 form-control">
+        className="btn-info mb-3 form-control"
+        disabled = {this.state.newTodo.length < 5}>
         {this.state.editing ? 'Editar Tarefa' : 'Adicionar Tarefa'}
         </button>
         {
-          !this.state.editing &&
+          this.state.loading &&
+          <img src={loading} className="loading" alt="loading" />
+        }
+
+        {
+          (!this.state.editing || this.state.loading) &&
             <ul className="list-group">
               {this.state.todos.map((item, index) => {
                 return <ListItem
